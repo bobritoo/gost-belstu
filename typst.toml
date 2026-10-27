@@ -1,6 +1,6 @@
 [package]
 name = "gost-belstu"
-version = "0.0.7"
+version = "0.0.8"
 entrypoint = "gost-belstu.typ"
 authors = ["bobritoo"]
 license = "MIT"
