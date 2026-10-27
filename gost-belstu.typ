@@ -101,7 +101,7 @@
   }
 }
 
-#let styles(content, italize-latin: true, lang: "ru") = {
+#let styles(content, italize-latin: false, lang: "ru") = {
 
 
   //---------- Общее ----------//
@@ -398,7 +398,7 @@
 
 //---------- Отладка ----------//
 
-#let styles-debug(content, italize-latin: true, lang: "ru") = {
+#let styles-debug(content, italize-latin: false, lang: "ru") = {
 
   let thickness = 1pt
 
