@@ -376,24 +376,58 @@
   let appendix-symbols = "АБВГДЕЖИКЛМНПРСТУФХЦШЩЭЮЯ".clusters()
   let get-appendix-symbol(n) = {
     if n >= appendix-symbols.len() {
-      return n - appendix-symbols.len() + 1;
+      panic("Too many appendicies")
     }
-    return upper(appendix-symbols.at(n))
+    appendix-symbols.at(n)
   }
 
-  show figure: set block(breakable: true)
+  let appendix-counter = counter("gost-belstu_appendix")
+  appendix-counter.step()
+  counter(figure.where(kind: image)).update(0)
+  counter(figure.where(kind: table)).update(0)
+  counter(figure.where(kind: raw)).update(0)
+
+  // если всего одно приложение, то подпись должна быть сверху
+  // TODO: проверить какой именно numbering должен быть, если всего один элемент в приложении
+  let figure-style;
+  if additional-elements.len() == 1 {
+    figure-style = (body) => {
+      show figure: set block(breakable: true)
+      set figure(numbering: n => context {
+        let appendix = appendix-counter.get().first()
+        [#get-appendix-symbol(appendix - 1).#n]
+      })
+      show figure: set figure.caption(position: top)
+      body
+    }
+  }
+  else {
+    figure-style = (body) => {
+      show figure: set block(breakable: true)
+      set figure(numbering: n => context {
+        let appendix = appendix-counter.get().first()
+        [#get-appendix-symbol(appendix - 1).#n]
+      })
+      body
+    }
+  }
   
-  for (i, appendix) in additional-elements.enumerate() {
-    align(center)[#heading(
-      level: 1,
-      numbering: none,
-      supplement: [Приложение],
-      [ПРИЛОЖЕНИЕ #get-appendix-symbol(i)],
-    )]
-    appendix
-  }
-}
+  show: figure-style;
 
+  context {
+    let appendix = appendix-counter.get().first()
+
+    align(center)[
+      #heading(
+        level: 1,
+        numbering: none,
+        supplement: [Приложение],
+        [ПРИЛОЖЕНИЕ #get-appendix-symbol(appendix - 1)],
+      )
+    ]
+  }
+  additional-elements.join()
+}
 
 
 //---------- Отладка ----------//
