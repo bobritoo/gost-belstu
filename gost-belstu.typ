@@ -236,7 +236,7 @@
     .map(b => heading.where(body: b))
     .reduce((a, b) => a.or(b))
 
-  show unnumbered: set heading(numbering: none, outlined: false)
+  show unnumbered: set heading(numbering: none)
   show unnumbered: it => {h(1fr);it.body;h(1fr)}
   // TODO: проверить, действительно ли нужно убирать такие заголовки из содержания (`outlined: false`)
 
