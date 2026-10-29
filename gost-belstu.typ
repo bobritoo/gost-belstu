@@ -7,7 +7,6 @@
 */
 
 // TODO: проверить как правильно оформлять содержание (outline)
-// TODO: чтобы маленькая таблица расширялась
 // TODO: список использованных источников
 
 // TODO: styles-debug: сделать предупреждения для неправильно оформленных списков
@@ -299,32 +298,28 @@
   show figure.where(kind: image): set figure(supplement: tr[Рисунок][Малюнак]);
 
 
-  // //---------- Таблицы ----------//
+  //---------- Таблицы ----------//
 
-  // Отображение подписи к таблице сверху слева относительно самой таблицы
-  show figure.where(kind: table): set figure.caption(position: top);
+  show figure.where(kind: table): set figure.caption(position: top)
+  show figure.where(kind: table): set block(breakable: true)   // 8.11.8
+  show figure.where(kind: table): set align(left)              // 8.11.4
+  show figure.caption.where(kind: table): set par(
+    first-line-indent: 0pt,
+    justify: false,
+  )
 
-  // TODO: сделать нормальные отступы у подписи таблицы (узнать как они вообще дожны себя вести)
-  show figure.caption.where(kind: table): it => {place[#it];v(14pt);}
-  
-  // //---------- Таблицы ----------//
+  show table: set text(12pt)                                   // 8.11.7
+  show table: set par(first-line-indent: 0pt, justify: false)
 
-  // show figure.where(kind: table): set figure.caption(position: top)
-  // show figure.where(kind: table): set block(breakable: true)   // 8.11.8
-  // show figure.where(kind: table): set align(left)              // 8.11.4
-
-  // show table: set text(12pt)                                   // 8.11.7
-  // show table: set par(first-line-indent: 0pt, justify: false)
-
-  // // растянуть таблицу, у которой все столбцы auto, на всю ширину
-  // show table: it => {
-  //   let cols = it.columns
-  //   if cols.all(c => c == auto) {
-  //     let f = it.fields()
-  //     let _ = f.remove("children")
-  //     table(..it.children, ..f, columns: (1fr,) * cols.len())
-  //   } else { it }
-  // }
+  // растянуть таблицу, у которой все столбцы auto, на всю ширину
+  show table: it => {
+    let cols = it.columns
+    if cols.all(c => c == auto) {
+      let f = it.fields()
+      let _ = f.remove("children")
+      table(..it.children, ..f, columns: (1fr,) * cols.len())
+    } else { it }
+  }
   
 
 
