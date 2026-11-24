@@ -1,6 +1,6 @@
-#import "@local/gost-belstu:0.0.8" as gost
+#import "@local/gost-belstu:0.0.9" as gost
 
-#show: it => gost.styles(it, italize-latin: false);
+#show: it => gost.styles(it);
 
 #gost.simple-title-page-belstu();
 

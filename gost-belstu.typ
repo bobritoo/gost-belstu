@@ -7,7 +7,6 @@
 */
 
 // TODO: проверить как правильно оформлять содержание (outline)
-// TODO: чтобы маленькая таблица расширялась
 // TODO: список использованных источников
 
 // TODO: styles-debug: сделать предупреждения для неправильно оформленных списков
@@ -91,6 +90,25 @@
 }
 
 
+#let style-fix-common-styling-issues(body) = {
+
+  // без моноширных излишеств
+  show raw.where(block: false): it => text(font: "Times New Roman", size: font-size, it.text)
+
+  // без жирного текста
+  show strong: it => it.body
+
+  // заменять «ё» на «е»
+  show "ё": "е"
+  show "Ё": "Е"
+
+  // TODO: проверять, есть ли символ двоеточия перед списком
+  // TODO: проверять, не заканчивается ли раздел списком или figure
+  // TODO: проверять, стоит ли ссылка на источник именно в конце предложения, а не в его середине
+
+  body
+}
+
 
 
 #let tr(ru, be) = context {
@@ -101,7 +119,7 @@
   }
 }
 
-#let styles(content, italize-latin: false, lang: "ru") = {
+#let styles(content, italize-latin: false, lang: "ru", fix-common-styling-issues: true) = {
 
 
   //---------- Общее ----------//
@@ -299,32 +317,28 @@
   show figure.where(kind: image): set figure(supplement: tr[Рисунок][Малюнак]);
 
 
-  // //---------- Таблицы ----------//
+  //---------- Таблицы ----------//
 
-  // Отображение подписи к таблице сверху слева относительно самой таблицы
-  show figure.where(kind: table): set figure.caption(position: top);
+  show figure.where(kind: table): set figure.caption(position: top)
+  show figure.where(kind: table): set block(breakable: true)   // 8.11.8
+  show figure.where(kind: table): set align(left)              // 8.11.4
+  show figure.caption.where(kind: table): set par(
+    first-line-indent: 0pt,
+    justify: false,
+  )
 
-  // TODO: сделать нормальные отступы у подписи таблицы (узнать как они вообще дожны себя вести)
-  show figure.caption.where(kind: table): it => {place[#it];v(14pt);}
-  
-  // //---------- Таблицы ----------//
+  show table: set text(12pt)                                   // 8.11.7
+  show table: set par(first-line-indent: 0pt, justify: false)
 
-  // show figure.where(kind: table): set figure.caption(position: top)
-  // show figure.where(kind: table): set block(breakable: true)   // 8.11.8
-  // show figure.where(kind: table): set align(left)              // 8.11.4
-
-  // show table: set text(12pt)                                   // 8.11.7
-  // show table: set par(first-line-indent: 0pt, justify: false)
-
-  // // растянуть таблицу, у которой все столбцы auto, на всю ширину
-  // show table: it => {
-  //   let cols = it.columns
-  //   if cols.all(c => c == auto) {
-  //     let f = it.fields()
-  //     let _ = f.remove("children")
-  //     table(..it.children, ..f, columns: (1fr,) * cols.len())
-  //   } else { it }
-  // }
+  // растянуть таблицу, у которой все столбцы auto, на всю ширину
+  show table: it => {
+    let cols = it.columns
+    if cols.all(c => c == auto) {
+      let f = it.fields()
+      let _ = f.remove("children")
+      table(..it.children, ..f, columns: (1fr,) * cols.len())
+    } else { it }
+  }
   
 
 
@@ -359,7 +373,10 @@
   //---------- Применение стилей ----------//
   
   let right-style_italize-latin(content) = if italize-latin { style-italze-latin(content); } else { content; }
-  right-style_italize-latin(content);
+
+  let right-style_fix-common-styling-issues(content) = if fix-common-styling-issues { style-fix-common-styling-issues(right-style_italize-latin(content)); } else { right-style_italize-latin(content); }
+
+  right-style_fix-common-styling-issues(content);
 }
 
 //---------- Приложения ----------//
@@ -376,29 +393,63 @@
   let appendix-symbols = "АБВГДЕЖИКЛМНПРСТУФХЦШЩЭЮЯ".clusters()
   let get-appendix-symbol(n) = {
     if n >= appendix-symbols.len() {
-      return n - appendix-symbols.len() + 1;
+      panic("Too many appendicies")
     }
-    return upper(appendix-symbols.at(n))
+    appendix-symbols.at(n)
   }
 
-  show figure: set block(breakable: true)
+  let appendix-counter = counter("gost-belstu_appendix")
+  appendix-counter.step()
+  counter(figure.where(kind: image)).update(0)
+  counter(figure.where(kind: table)).update(0)
+  counter(figure.where(kind: raw)).update(0)
+
+  // если всего одно приложение, то подпись должна быть сверху
+  // TODO: проверить какой именно numbering должен быть, если всего один элемент в приложении
+  let figure-style;
+  if additional-elements.len() == 1 {
+    figure-style = (body) => {
+      show figure: set block(breakable: true)
+      set figure(numbering: n => context {
+        let appendix = appendix-counter.get().first()
+        [#get-appendix-symbol(appendix - 1).#n]
+      })
+      show figure: set figure.caption(position: top)
+      body
+    }
+  }
+  else {
+    figure-style = (body) => {
+      show figure: set block(breakable: true)
+      set figure(numbering: n => context {
+        let appendix = appendix-counter.get().first()
+        [#get-appendix-symbol(appendix - 1).#n]
+      })
+      body
+    }
+  }
   
-  for (i, appendix) in additional-elements.enumerate() {
-    align(center)[#heading(
-      level: 1,
-      numbering: none,
-      supplement: [Приложение],
-      [ПРИЛОЖЕНИЕ #get-appendix-symbol(i)],
-    )]
-    appendix
-  }
-}
+  show: figure-style;
 
+  context {
+    let appendix = appendix-counter.get().first()
+
+    align(center)[
+      #heading(
+        level: 1,
+        numbering: none,
+        supplement: [Приложение],
+        [ПРИЛОЖЕНИЕ #get-appendix-symbol(appendix - 1)],
+      )
+    ]
+  }
+  additional-elements.join()
+}
 
 
 //---------- Отладка ----------//
 
-#let styles-debug(content, italize-latin: false, lang: "ru") = {
+#let styles-debug(content, italize-latin: false, lang: "ru", fix-common-styling-issues: true) = {
 
   let thickness = 1pt
 
@@ -487,7 +538,7 @@
 
   // стандартные стили
 
-  styles(content, italize-latin: italize-latin, lang: lang);
+  styles(content, italize-latin: italize-latin, lang: lang, fix-common-styling-issues: fix-common-styling-issues);
 }
 
 

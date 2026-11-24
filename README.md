@@ -32,7 +32,7 @@ wget https://raw.githubusercontent.com/bobritoo/gost-belstu/refs/heads/main/gost
 
 Чтобы применить стили, подключите эту библиотеку и передайте всё содержимое документа функции `styles` (`#show: it => gost.styles(it)`), вот:
 ```typ
-#import "@local/gost-belstu:0.0.8" as gost
+#import "@local/gost-belstu:0.0.9" as gost
 // или если вы скачивли файл:
 // #import "gost-belstu.typ" as gost
 
