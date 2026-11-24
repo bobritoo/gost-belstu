@@ -18,14 +18,14 @@
 
 Клонируйте репозиторий, запустите скрипт установки (просто копирует файлы в нужное место):
 ```sh
-git clone --depth 1 https://github.com/bobritoo/gost-belstu.git
+git clone --depth 1 https://github.com/qobrito/gost-belstu.git
 cd gost-belstu
 ./install.sh
 ```
 
 Или просто скачать один файл:
 ```sh
-wget https://raw.githubusercontent.com/bobritoo/gost-belstu/refs/heads/main/gost-belstu.typ
+wget https://raw.githubusercontent.com/qobrito/gost-belstu/refs/heads/main/gost-belstu.typ
 ```
 
 ## Как использовать?
