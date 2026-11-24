@@ -90,6 +90,25 @@
 }
 
 
+#let style-fix-common-styling-issues(body) = {
+
+  // без моноширных излишеств
+  show raw.where(block: false): it => text(font: "Times New Roman", size: font-size, it.text)
+
+  // без жирного текста
+  show strong: it => it.body
+
+  // заменять «ё» на «е»
+  show "ё": "е"
+  show "Ё": "Е"
+
+  // TODO: проверять, есть ли символ двоеточия перед списком
+  // TODO: проверять, не заканчивается ли раздел списком или figure
+  // TODO: проверять, стоит ли ссылка на источник именно в конце предложения, а не в его середине
+
+  body
+}
+
 
 
 #let tr(ru, be) = context {
@@ -100,7 +119,7 @@
   }
 }
 
-#let styles(content, italize-latin: false, lang: "ru") = {
+#let styles(content, italize-latin: false, lang: "ru", fix-common-styling-issues: true) = {
 
 
   //---------- Общее ----------//
@@ -354,7 +373,10 @@
   //---------- Применение стилей ----------//
   
   let right-style_italize-latin(content) = if italize-latin { style-italze-latin(content); } else { content; }
-  right-style_italize-latin(content);
+
+  let right-style_fix-common-styling-issues(content) = if fix-common-styling-issues { style-fix-common-styling-issues(right-style_italize-latin(content)); } else { right-style_italize-latin(content); }
+
+  right-style_fix-common-styling-issues(content);
 }
 
 //---------- Приложения ----------//
@@ -427,7 +449,7 @@
 
 //---------- Отладка ----------//
 
-#let styles-debug(content, italize-latin: false, lang: "ru") = {
+#let styles-debug(content, italize-latin: false, lang: "ru", fix-common-styling-issues: true) = {
 
   let thickness = 1pt
 
@@ -516,7 +538,7 @@
 
   // стандартные стили
 
-  styles(content, italize-latin: italize-latin, lang: lang);
+  styles(content, italize-latin: italize-latin, lang: lang, fix-common-styling-issues: fix-common-styling-issues);
 }
 
 
